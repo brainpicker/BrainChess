@@ -11,10 +11,11 @@ Preloader.prototype = {
 
         this.game.load.tilemap('map', 'assets/tilemaps/chess_board.json', null, Phaser.Tilemap.TILED_JSON);
         this.game.load.image('gridtiles', 'assets/gridtiles.png');
+        this.game.load.spritesheet('chess_pieces', 'assets/chess_pieces.png', 64, 64, 12);
     },
 
     create: function () {
-        
+
     },
 
     update: function () {
