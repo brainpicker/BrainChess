@@ -6,7 +6,13 @@ var King = require('../entities/king');
 var Pawn = require('../entities/pawn');
 
 var Game = function () {
-
+    var boardX;
+    var boardY;
+    var currentPiece;
+    var board;
+    var boardLayer;
+    var originalX;
+    var originalY;
 };
 
 module.exports = Game;
@@ -22,50 +28,71 @@ Game.prototype = {
         var backgroundLayer = map.createLayer('board');
         backgroundLayer.scale.set(2);
         backgroundLayer.resizeWorld();
+        this.boardLayer = backgroundLayer;
 
-        var blackPiecesArray = [
-            new Rook(this.game, 0, 0, 'black'),
-            new Horse(this.game, 64, 0, 'black'),
-            new Bishop(this.game, 128, 0, 'black'),
-            new Queen(this.game, 192, 0, 'black'),
-            new King(this.game, 256, 0, 'black'),
-            new Bishop(this.game, 320, 0, 'black'),
-            new Horse(this.game, 384, 0, 'black'),
-            new Rook(this.game, 448, 0, 'black')
+        this.board = [
+            [
+                new Rook(this.game, 0, 0, 'black'),
+                new Horse(this.game, 64, 0, 'black'),
+                new Bishop(this.game, 128, 0, 'black'),
+                new Queen(this.game, 192, 0, 'black'),
+                new King(this.game, 256, 0, 'black'),
+                new Bishop(this.game, 320, 0, 'black'),
+                new Horse(this.game, 384, 0, 'black'),
+                new Rook(this.game, 448, 0, 'black')
+            ],
+            [
+                new Pawn(this.game, 0, 64, 'black'),
+                new Pawn(this.game, 64, 64, 'black'),
+                new Pawn(this.game, 128, 64, 'black'),
+                new Pawn(this.game, 192, 64, 'black'),
+                new Pawn(this.game, 256, 64, 'black'),
+                new Pawn(this.game, 320, 64, 'black'),
+                new Pawn(this.game, 384, 64, 'black'),
+                new Pawn(this.game, 448, 64, 'black')
+            ],
+            [null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null],
+            [
+                new Pawn(this.game, 0, 384, 'white'),
+                new Pawn(this.game, 64, 384, 'white'),
+                new Pawn(this.game, 128, 384, 'white'),
+                new Pawn(this.game, 192, 384, 'white'),
+                new Pawn(this.game, 256, 384, 'white'),
+                new Pawn(this.game, 320, 384, 'white'),
+                new Pawn(this.game, 384, 384, 'white'),
+                new Pawn(this.game, 448, 384, 'white')
+            ],
+            [
+                new Rook(this.game, 0, 448, 'white'),
+                new Horse(this.game, 64, 448, 'white'),
+                new Bishop(this.game, 128, 448, 'white'),
+                new Queen(this.game, 192, 448, 'white'),
+                new King(this.game, 256, 448, 'white'),
+                new Bishop(this.game, 320, 448, 'white'),
+                new Horse(this.game, 384, 448, 'white'),
+                new Rook(this.game, 448, 448, 'white')
+            ]
         ];
 
-        for (var i = 0; i < 8; i++) {
-            blackPiecesArray.push(new Pawn(this.game, i * 64, 64));
+        this.boardPieces = this.game.add.group();
+        for (boardX = 0; boardX < this.board.length; boardX++) {
+            for (boardY = 0; boardY < this.board[boardX].length; boardY++) {
+                this.currentPiece = this.board[boardX][boardY];
+                if (this.currentPiece != null) {
+                    this.game.add.existing(this.currentPiece);
+                    this.currentPiece.inputEnabled = true;
+                    this.currentPiece.input.enableDrag();
+                    this.currentPiece.input.enableSnap(64, 64, false, true);
+                    this.currentPiece.events.onDragStart.add(this.onDragStart, this);
+                    this.currentPiece.events.onDragStop.add(this.onDragStop, this);
+                    this.boardPieces.add(this.currentPiece);
+                }
+            }
+
         }
-
-        this.blackPieces = this.game.add.group();
-        blackPiecesArray.forEach(function(blackPiece) {
-            this.game.add.existing(blackPiece);
-            this.blackPieces.add(blackPiece);
-        }, this);
-
-
-        var whitePiecesArray = [
-            new Rook(this.game, 0, 448, 'white'),
-            new Horse(this.game, 64, 448, 'white'),
-            new Bishop(this.game, 128, 448, 'white'),
-            new Queen(this.game, 192, 448, 'white'),
-            new King(this.game, 256, 448, 'white'),
-            new Bishop(this.game, 320, 448, 'white'),
-            new Horse(this.game, 384, 448, 'white'),
-            new Rook(this.game, 448, 448, 'white')
-        ];
-
-        for (i = 0; i < 8; i++) {
-            whitePiecesArray.push(new Pawn(this.game, i * 64, 384, 'white'));
-        }
-
-        this.whitePieces = this.game.add.group();
-        whitePiecesArray.forEach(function(blackPiece) {
-            this.game.add.existing(blackPiece);
-            this.whitePieces.add(blackPiece);
-        }, this);
-
 
     },
 
@@ -75,5 +102,47 @@ Game.prototype = {
 
     onInputDown: function () {
         this.game.state.start('Menu');
+    },
+
+    onDragStart: function (sprite, pointer) {
+        this.originalX = sprite.x;
+        this.originalY = sprite.y;
+        console.log(sprite);
+    },
+
+    onDragStop: function (sprite, pointer) {
+        console.log(sprite);
+
+        var tileX = sprite.x / 64;
+        var tileY = sprite.y / 64;
+        this.currentPiece = this.board[tileY][tileX];
+
+        var validOverlap = this.checkValidOverlap(sprite, this.currentPiece);
+        if (!validOverlap) {
+            sprite.x = this.originalX;
+            sprite.y = this.originalY;
+        } else {
+            if (this.currentPiece != null) {
+                this.currentPiece.destroy(true);
+            }
+            this.board[tileY][tileX] = sprite;
+            this.board[this.originalY / 64][this.originalX / 64] = null;
+        }
+
+    },
+
+    checkValidOverlap: function(sprite1, sprite2) {
+        if (sprite1 == null || sprite2 == null) {
+            return true;
+        }
+        if (sprite1.x == sprite2.x && sprite1.y == sprite2.y) {
+            console.log('overlap: ' + sprite2);
+            if (sprite1.color == sprite2.color) {
+                console.log('Color of sprites are the same, INVALID');
+                return false;
+            }
+        }
+
+        return true;
     }
 };
