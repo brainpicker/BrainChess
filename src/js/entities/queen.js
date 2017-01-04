@@ -6,7 +6,11 @@ var Queen = function (game, x, y, color) {
 
 };
 
-Queen.prototype = Piece.prototype;
+Queen.prototype = Object.create(Piece.prototype);
 Queen.prototype.constructor = Queen;
+
+Queen.prototype.isValidMove = function (toPositionX, toPositionY, board) {
+
+};
 
 module.exports = Queen;

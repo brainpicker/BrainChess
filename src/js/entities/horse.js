@@ -6,7 +6,11 @@ var Horse = function (game, x, y, color) {
 
 };
 
-Horse.prototype = Piece.prototype;
+Horse.prototype = Object.create(Piece.prototype);
 Horse.prototype.constructor = Horse;
+
+Horse.prototype.isValidMove = function (toPositionX, toPositionY, board) {
+
+};
 
 module.exports = Horse;

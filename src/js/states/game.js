@@ -88,12 +88,14 @@ Game.prototype = {
                     this.currentPiece.input.enableSnap(64, 64, false, true);
                     this.currentPiece.events.onDragStart.add(this.onDragStart, this);
                     this.currentPiece.events.onDragStop.add(this.onDragStop, this);
+                    this.currentPiece.events.onDragUpdate.add(this.onDragUpdate, this);
                     this.boardPieces.add(this.currentPiece);
                 }
             }
 
         }
 
+        this.printXY();
     },
 
     update: function () {
@@ -105,23 +107,35 @@ Game.prototype = {
     },
 
     onDragStart: function (sprite, pointer) {
+        this.printPosition(sprite);
         this.originalX = sprite.x;
         this.originalY = sprite.y;
         console.log(sprite);
     },
 
     onDragStop: function (sprite, pointer) {
+        this.printPosition(sprite);
         console.log(sprite);
 
         var tileX = sprite.x / 64;
         var tileY = sprite.y / 64;
         this.currentPiece = this.board[tileY][tileX];
 
+        // same tile
+        if (sprite.x == this.originalX && sprite.y == this.originalY) {
+            return;
+        }
+
         var validOverlap = this.checkValidOverlap(sprite, this.currentPiece);
         if (!validOverlap) {
             sprite.x = this.originalX;
             sprite.y = this.originalY;
         } else {
+            if (!sprite.isValidMove(this.originalX, this.originalY, this.board)) {
+                sprite.x = this.originalX;
+                sprite.y = this.originalY;
+                return;
+            }
             if (this.currentPiece != null) {
                 this.currentPiece.destroy(true);
             }
@@ -129,6 +143,10 @@ Game.prototype = {
             this.board[this.originalY / 64][this.originalX / 64] = null;
         }
 
+    },
+
+    onDragUpdate: function (sprite, pointer) {
+        this.printPosition(sprite);
     },
 
     checkValidOverlap: function(sprite1, sprite2) {
@@ -144,5 +162,21 @@ Game.prototype = {
         }
 
         return true;
+    },
+
+    printXY: function() {
+        var style = { font: "20px Courier", fill: "#fff", tabs: 80 };
+        for (boardX = 0; boardX < this.board.length; boardX++) {
+            this.game.add.text(boardX * 64 + 24, 516, boardX, style);
+        }
+        for (boardY = 0; boardY < this.board.length; boardY++) {
+            this.game.add.text(0, boardY * 64 + 32, boardY, style);
+        }
+    },
+
+    printPosition: function(sprite) {
+        this.game.debug.text('Piece in motion: ' + sprite.constructor.name, 32, 548, 'rgb(255,255,255)');
+        this.game.debug.text('Tile X: ' + sprite.x / 64, 32, 564, 'rgb(255,255,255)');
+        this.game.debug.text('Tile Y: ' + sprite.y / 64, 32, 580, 'rgb(255,255,255)');
     }
 };

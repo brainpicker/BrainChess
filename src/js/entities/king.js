@@ -6,7 +6,11 @@ var King = function (game, x, y, color) {
 
 };
 
-King.prototype = Piece.prototype;
+King.prototype = Object.create(Piece.prototype);
 King.prototype.constructor = King;
+
+King.prototype.isValidMove = function (toPositionX, toPositionY, board) {
+
+};
 
 module.exports = King;
