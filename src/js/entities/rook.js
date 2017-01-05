@@ -10,11 +10,15 @@ Rook.prototype = Object.create(Piece.prototype);
 Rook.prototype.constructor = Rook;
 
 Rook.prototype.isValidMove = function (originalX, originalY, board) {
+    return this.isRookValidMove(originalX, originalY, this.x, this.y, board);
+};
+
+Rook.prototype.isRookValidMove = function(originalX, originalY, x, y, board) {
     var tileX = originalX / 64;
     var tileY = originalY / 64;
 
-    var toTileX = this.x / 64;
-    var toTileY = this.y / 64;
+    var toTileX = x / 64;
+    var toTileY = y / 64;
 
     if (!(tileX - toTileX == 0 && tileY != toTileY) && !(tileX != toTileX && tileY - toTileY == 0)) {
         return false;
@@ -37,13 +41,20 @@ Rook.prototype.isValidMove = function (originalX, originalY, board) {
         dirY = 0;
     }
 
-    for (var i = 1; i < Math.abs(tileX - toTileX) - 1; i++) {
+    var limit;
+    if (dirX) {
+        limit = Math.abs(tileX - toTileX);
+    } else {
+        limit = Math.abs(tileY - toTileY);
+    }
+
+    for (var i = 1; i < limit; i++) {
         if (board[tileY + i * dirY][tileX + i * dirX] != null) {
             return false;
         }
     }
-    return true;
 
+    return true;
 };
 
 module.exports = Rook;

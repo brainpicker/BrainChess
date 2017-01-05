@@ -10,7 +10,7 @@ var Piece = function (game, x, y, color) {
 Piece.prototype = Object.create(Phaser.Sprite.prototype);
 Piece.prototype.constructor = Piece;
 
-Piece.prototype.isValidMove = function (toPositionX, toPositionY, board) {
+Piece.prototype.isValidMove = function (originalX, originalY, board) {
 
 };
 
